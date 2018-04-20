@@ -31,18 +31,18 @@ public class Board {
             int row = (int) (Math.random() * cells.length);
             int col = (int) (Math.random() * cells.length);
             if (cells[row][col] == null) {
-                cells[row][col] = new MineCell();
+                cells[row][col] = new MineCell(row, col);
                 minesLeft--;
             }
         }
     }
 
     private void populateNumberCells() {
-        for (int i = 0; i < cells.length; i++) {
-            for (int j = 0; j < cells.length; j++) {
-                if (cells[i][j] == null) {
-                    int cellValue = countSurroundingBombs(i, j);
-                    cells[i][j] = new NumberCell(cellValue);
+        for (int row = 0; row < cells.length; row++) {
+            for (int col = 0; col < cells.length; col++) {
+                if (cells[row][col] == null) {
+                    int cellValue = countSurroundingBombs(row, col);
+                    cells[row][col] = new NumberCell(row, col, cellValue);
                 }
             }
         }
@@ -70,8 +70,16 @@ public class Board {
 
     }
 
+    public boolean isCompleted() {
+        return mineCount == 0;
+    }
+
     public int size() {
         return cells.length;
+    }
+
+    public Cell getCell(int row, int col) {
+        return cells[row][col];
     }
 
     public void print() {

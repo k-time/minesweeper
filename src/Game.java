@@ -7,6 +7,12 @@ public class Game {
     private static final Scanner in = new Scanner(System.in);
     private Board board;
 
+    public enum Status {
+        FINISHED,
+        SUCCESS,
+        FAILURE
+    }
+
     public Game() {
         System.out.println("Welcome to Minesweeper!");
         System.out.println("Enter your moves as the letter and number corresponding to each cell (ex. C5).\n");
@@ -29,22 +35,30 @@ public class Game {
         this.board = new Board(size);
     }
 
-    public void promptForMove() {
+    public Status move() {
+        Move move = promptForMove();
+        return executeMove(move);
+    }
+
+    public void end() {
+        System.out.println("Thanks for playing!");
+        in.close();
+    }
+
+    private Move promptForMove() {
         System.out.println();
         board.print();
         System.out.println();
         System.out.print("Please enter your move: ");
-        Move move = null;
-        while (move == null) {
+        while (true) {
             try {
-                move = parseMoveFromInput(in.next());
+                return parseMoveFromInput(in.next());
             }
             catch (NoSuchElementException e) {
                 System.out.print("Invalid move, try again (ex. C5): ");
                 in.nextLine();
             }
         }
-        System.out.printf("Moving row %d, col %d", move.getRow(), move.getCol());
     }
 
     private Move parseMoveFromInput(String input) throws InputMismatchException {
@@ -67,4 +81,17 @@ public class Game {
         throw new InputMismatchException("Invalid move");
     }
 
+    private Status executeMove(Move move) {
+        Cell cell = board.getCell(move.getRow(), move.getCol());
+        if (cell.isMine()) {
+            System.out.println("You hit a mine!");
+            return Status.FAILURE;
+        }
+        processNumberCell(cell);
+        return board.isCompleted() ? Status.FINISHED : Status.SUCCESS;
+    }
+
+    private void processNumberCell(Cell cell) {
+
+    }
 }
