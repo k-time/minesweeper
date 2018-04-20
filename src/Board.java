@@ -23,8 +23,6 @@ public class Board {
     private void populateCells() {
         populateMineCells();
         populateNumberCells();
-        System.out.println("Finished creating board.");
-
     }
 
     private void populateMineCells() {
@@ -70,6 +68,10 @@ public class Board {
         }
         return count;
 
+    }
+
+    public int size() {
+        return cells.length;
     }
 
     public void print() {
