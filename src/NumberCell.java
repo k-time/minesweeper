@@ -1,4 +1,3 @@
-package com.ktime.minesweeper;
 
 public class NumberCell extends Cell {
 

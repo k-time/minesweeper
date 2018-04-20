@@ -1,5 +1,3 @@
-package com.ktime.minesweeper;
-
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
