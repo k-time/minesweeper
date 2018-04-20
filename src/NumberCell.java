@@ -1,21 +1,21 @@
 
 public class NumberCell extends Cell {
 
-    private int bombCount;
+    private int neighborMineCount;
 
     public NumberCell(int neighborCount) {
-        this.bombCount = neighborCount;
+        this.neighborMineCount = neighborCount;
     }
 
-    public int getBombCount() {
-        return bombCount;
+    public int getNeighborMineCount() {
+        return neighborMineCount;
     }
 
     @Override
     public String toString() {
-        if (bombCount == 0) {
+        if (neighborMineCount == 0) {
             return " ";
         }
-        return String.valueOf(bombCount);
+        return String.valueOf(neighborMineCount);
     }
 }

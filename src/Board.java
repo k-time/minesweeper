@@ -4,6 +4,7 @@ public class Board {
     private static final int MIN_SIZE = 8;
     private static final int MAX_SIZE = 26;
     private Cell[][] cells;
+    private int mineCount;
 
     public Board(int size) {
         if (size < MIN_SIZE) {
@@ -15,20 +16,30 @@ public class Board {
             size = MAX_SIZE;
         }
         this.cells = new Cell[size][size];
-        fillCells();
+        this.mineCount = (size * size) / 10; // ~10% of cells will have mines
+        populateCells();
     }
 
-    private void fillCells() {
-        int numCells = (int) Math.pow(cells.length, 2);
-        int numBombs = numCells / 10;
-        while (numBombs > 0) {
+    private void populateCells() {
+        populateMineCells();
+        populateNumberCells();
+        System.out.println("Finished creating board.");
+
+    }
+
+    private void populateMineCells() {
+        int minesLeft = mineCount;
+        while (minesLeft > 0) {
             int row = (int) (Math.random() * cells.length);
             int col = (int) (Math.random() * cells.length);
             if (cells[row][col] == null) {
                 cells[row][col] = new MineCell();
-                numBombs--;
+                minesLeft--;
             }
         }
+    }
+
+    private void populateNumberCells() {
         for (int i = 0; i < cells.length; i++) {
             for (int j = 0; j < cells.length; j++) {
                 if (cells[i][j] == null) {
@@ -37,8 +48,6 @@ public class Board {
                 }
             }
         }
-        System.out.println("Finished creating board.");
-
     }
 
     private int countSurroundingBombs(int row, int col) {
@@ -76,7 +85,7 @@ public class Board {
             }
             sb.append(i);
         }
-        sb.append("\n    ");
+        sb.append("\n   ");
         for (int i = 0; i < cells.length; i++) {
             sb.append("--");
         }
