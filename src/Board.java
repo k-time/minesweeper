@@ -174,6 +174,11 @@ public class Board {
         System.out.println(this.toString(true));
     }
 
+    @Override
+    public String toString() {
+        return this.toString(false);
+    }
+
     public String toString(boolean printHidden) {
         StringBuilder sb = new StringBuilder("   ");
         for (int i = 1; i <= this.size(); i++) {
