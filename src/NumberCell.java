@@ -15,7 +15,7 @@ public class NumberCell extends Cell {
     @Override
     public String toString() {
         if (neighborMineCount == 0) {
-            return " ";
+            return "-";
         }
         return String.valueOf(neighborMineCount);
     }

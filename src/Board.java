@@ -1,10 +1,19 @@
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 
 public class Board {
 
     private static final int MIN_SIZE = 8;
     private static final int MAX_SIZE = 26;
     private Cell[][] cells;
-    private int mineCount;
+
+    public enum Status {
+        FINISHED,
+        SUCCESS,
+        FAILURE
+    }
 
     public Board(int size) {
         if (size < MIN_SIZE) {
@@ -16,7 +25,6 @@ public class Board {
             size = MAX_SIZE;
         }
         this.cells = new Cell[size][size];
-        this.mineCount = (size * size) / 10; // ~10% of cells will have mines
         populateCells();
     }
 
@@ -26,13 +34,13 @@ public class Board {
     }
 
     private void populateMineCells() {
-        int minesLeft = mineCount;
-        while (minesLeft > 0) {
+        int mineCount = (this.size() * this.size()) / 6; // ~20% of cells will have mines
+        while (mineCount > 0) {
             int row = (int) (Math.random() * cells.length);
             int col = (int) (Math.random() * cells.length);
             if (cells[row][col] == null) {
                 cells[row][col] = new MineCell(row, col);
-                minesLeft--;
+                mineCount--;
             }
         }
     }
@@ -71,7 +79,15 @@ public class Board {
     }
 
     public boolean isCompleted() {
-        return mineCount == 0;
+        for (int row = 0; row < this.size(); row++) {
+            for (int col = 0; col < this.size(); col++) {
+                Cell cell = this.getCell(row, col);
+                if (!cell.isMine() && cell.isHidden()) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     public int size() {
@@ -82,12 +98,65 @@ public class Board {
         return cells[row][col];
     }
 
-    public void print() {
-        System.out.println(this.toString());
+    public Board.Status processCell(int row, int col) {
+        Cell cell = this.getCell(row, col);
+        cell.onClick();
+        if (cell.isMine()) {
+            System.out.println("You hit a mine! You lose.");
+            return Board.Status.FAILURE;
+        }
+        processNumberCell((NumberCell) cell);
+        if (this.isCompleted()) {
+            return Board.Status.FINISHED;
+        }
+        return Board.Status.SUCCESS;
     }
 
-    @Override
-    public String toString() {
+    private void processNumberCell(NumberCell cell) {
+        Queue<NumberCell> queue = new LinkedList<>();
+        queue.add(cell);
+        while (!queue.isEmpty()) {
+            NumberCell cur = queue.remove();
+            cur.onClick();
+            if (cur.getNeighborMineCount() == 0) {
+                for (Cell neighbor : this.getAdjacentCells(cur)) {
+                    if (!neighbor.isMine() && neighbor.isHidden()
+                            && ((NumberCell) neighbor).getNeighborMineCount() == 0) {
+                        queue.add((NumberCell) neighbor);
+                    }
+                }
+            }
+        }
+    }
+
+    private List<Cell> getAdjacentCells(Cell cell) {
+        List<Cell> list = new ArrayList<>();
+        int row = cell.getRow();
+        int col = cell.getCol();
+        if (row > 0) {
+            list.add(this.getCell(row-1, col));
+        }
+        if (row < this.size()-1) {
+            list.add(this.getCell(row+1, col));
+        }
+        if (col > 0) {
+            list.add(this.getCell(row, col-1));
+        }
+        if (col < this.size()-1) {
+            list.add(this.getCell(row, col+1));
+        }
+        return list;
+    }
+
+    public void print() {
+        System.out.println(this.toString(false));
+    }
+
+    public void printHidden() {
+        System.out.println(this.toString(true));
+    }
+
+    public String toString(boolean printHidden) {
         StringBuilder sb = new StringBuilder("   ");
         for (int i = 1; i <= cells.length; i++) {
             if (i < 10) {
@@ -105,7 +174,8 @@ public class Board {
             sb.append(" |");
             for (int j = 0; j < cells.length; j++) {
                 sb.append(" ");
-                sb.append(cells[i][j].toString());
+                Cell cell = this.getCell(i, j);
+                sb.append(cell.isHidden() && !printHidden ? " " : cell.toString());
             }
             sb.append("\n");
         }

@@ -4,14 +4,8 @@ import java.util.Scanner;
 
 public class Game {
 
-    private static final Scanner in = new Scanner(System.in);
+    public static final Scanner in = new Scanner(System.in);
     private Board board;
-
-    public enum Status {
-        FINISHED,
-        SUCCESS,
-        FAILURE
-    }
 
     public Game() {
         System.out.println("Welcome to Minesweeper!");
@@ -35,7 +29,7 @@ public class Game {
         this.board = new Board(size);
     }
 
-    public Status move() {
+    public Board.Status move() {
         Move move = promptForMove();
         return executeMove(move);
     }
@@ -48,6 +42,8 @@ public class Game {
     private Move promptForMove() {
         System.out.println();
         board.print();
+        System.out.println();
+        board.printHidden();
         System.out.println();
         System.out.print("Please enter your move: ");
         while (true) {
@@ -81,17 +77,7 @@ public class Game {
         throw new InputMismatchException("Invalid move");
     }
 
-    private Status executeMove(Move move) {
-        Cell cell = board.getCell(move.getRow(), move.getCol());
-        if (cell.isMine()) {
-            System.out.println("You hit a mine!");
-            return Status.FAILURE;
-        }
-        processNumberCell(cell);
-        return board.isCompleted() ? Status.FINISHED : Status.SUCCESS;
-    }
-
-    private void processNumberCell(Cell cell) {
-
+    private Board.Status executeMove(Move move) {
+        return board.processCell(move.getRow(), move.getCol());
     }
 }
