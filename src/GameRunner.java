@@ -3,6 +3,9 @@ import java.util.Scanner;
 public class GameRunner {
 
     public static void main(String[] args) {
+        System.out.println(
+                "************************** Welcome to Minesweeper! **************************\n" +
+                "Enter your moves as the letter and number corresponding to each cell (ex. C5).\n");
         boolean playAgain = true;
         while (playAgain) {
             Game game = new Game();
@@ -15,9 +18,9 @@ public class GameRunner {
             }
             System.out.print("Play again? (y/n): ");
             String answer = Game.in.next().toLowerCase();
-            playAgain = answer.equals("y") || answer.equals("yes");
-            Game.in.nextLine();
-            game.end();
+            playAgain = answer.startsWith("y");
         }
+        System.out.println("Thanks for playing!");
+        Game.end();
     }
 }

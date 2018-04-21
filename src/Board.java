@@ -34,23 +34,23 @@ public class Board {
     }
 
     private void populateMineCells() {
-        int mineCount = (this.size() * this.size()) / 6; // ~20% of cells will have mines
+        int mineCount = (this.size() * this.size()) / 6; // ~1/6 of cells will have mines
         while (mineCount > 0) {
-            int row = (int) (Math.random() * cells.length);
-            int col = (int) (Math.random() * cells.length);
-            if (cells[row][col] == null) {
-                cells[row][col] = new MineCell(row, col);
+            int row = (int) (Math.random() * this.size());
+            int col = (int) (Math.random() * this.size());
+            if (this.getCell(row, col) == null) {
+                this.setCell(row, col, new MineCell(row, col));
                 mineCount--;
             }
         }
     }
 
     private void populateNumberCells() {
-        for (int row = 0; row < cells.length; row++) {
-            for (int col = 0; col < cells.length; col++) {
-                if (cells[row][col] == null) {
+        for (int row = 0; row < this.size(); row++) {
+            for (int col = 0; col < this.size(); col++) {
+                if (this.getCell(row, col) == null) {
                     int cellValue = countSurroundingBombs(row, col);
-                    cells[row][col] = new NumberCell(row, col, cellValue);
+                    this.setCell(row, col, new NumberCell(row, col, cellValue));
                 }
             }
         }
@@ -58,23 +58,25 @@ public class Board {
 
     private int countSurroundingBombs(int row, int col) {
         int count = 0;
-        // above
-        if (row > 0 && cells[row-1][col] != null && cells[row-1][col].isMine()) {
-            count++;
-        }
-        // below
-        if (row < cells.length-1 && cells[row+1][col] != null && cells[row+1][col].isMine()) {
-            count++;
-        }
-        // left
-        if (col > 0 && cells[row][col-1] != null && cells[row][col-1].isMine()) {
-            count++;
-        }
-        // right
-        if (col < cells.length-1 && cells[row][col+1] != null && cells[row][col+1].isMine()) {
-            count++;
+
+        int rowTop = row == 0 ? row : row-1;
+        int rowBottom = row == this.size()-1 ? row : row+1;
+        int colLeft = col == 0 ? col : col-1;
+        int colRight = col == this.size()-1 ? col : col+1;
+
+        for (int i = rowTop; i <= rowBottom; i++) {
+            for (int j = colLeft; j <= colRight; j++) {
+                Cell cell = this.getCell(i, j);
+                if (cell != null && cell.isMine()) {
+                    count++;
+                }
+            }
         }
         return count;
+    }
+
+    public void flagCell(Move move) {
+        // TODO: Implement ability to flag a cell without clicking it
 
     }
 
@@ -98,16 +100,27 @@ public class Board {
         return cells[row][col];
     }
 
+    private void setCell(int row, int col, Cell cell) {
+        cells[row][col] = cell;
+    }
+
     public Board.Status processCell(int row, int col) {
         Cell cell = this.getCell(row, col);
-        cell.onClick();
-        if (cell.isMine()) {
-            System.out.println("You hit a mine! You lose.");
-            return Board.Status.FAILURE;
-        }
-        processNumberCell((NumberCell) cell);
-        if (this.isCompleted()) {
-            return Board.Status.FINISHED;
+        if (cell.isHidden()) {
+            cell.onClick();
+            if (cell.isMine()) {
+                System.out.println();
+                this.printHidden();
+                System.out.println("You hit a mine! You lose.");
+                return Board.Status.FAILURE;
+            }
+            processNumberCell((NumberCell) cell);
+            if (this.isCompleted()) {
+                System.out.println();
+                this.printHidden();
+                System.out.println("Congratulations, you won!");
+                return Board.Status.FINISHED;
+            }
         }
         return Board.Status.SUCCESS;
     }
@@ -120,9 +133,14 @@ public class Board {
             cur.onClick();
             if (cur.getNeighborMineCount() == 0) {
                 for (Cell neighbor : this.getAdjacentCells(cur)) {
-                    if (!neighbor.isMine() && neighbor.isHidden()
-                            && ((NumberCell) neighbor).getNeighborMineCount() == 0) {
-                        queue.add((NumberCell) neighbor);
+                    if (!neighbor.isMine() && neighbor.isHidden()) {
+                        NumberCell nc = (NumberCell) neighbor;
+                        if (nc.getNeighborMineCount() == 0) {
+                            queue.add(nc);
+                        }
+                        else {
+                            nc.onClick();
+                        }
                     }
                 }
             }
@@ -158,21 +176,21 @@ public class Board {
 
     public String toString(boolean printHidden) {
         StringBuilder sb = new StringBuilder("   ");
-        for (int i = 1; i <= cells.length; i++) {
+        for (int i = 1; i <= this.size(); i++) {
             if (i < 10) {
                 sb.append(" ");
             }
             sb.append(i);
         }
         sb.append("\n   ");
-        for (int i = 0; i < cells.length; i++) {
+        for (int i = 0; i < this.size(); i++) {
             sb.append("--");
         }
         sb.append("\n");
-        for (int i = 0; i < cells.length; i++) {
+        for (int i = 0; i < this.size(); i++) {
             sb.append((char)('A' + i));
             sb.append(" |");
-            for (int j = 0; j < cells.length; j++) {
+            for (int j = 0; j < this.size(); j++) {
                 sb.append(" ");
                 Cell cell = this.getCell(i, j);
                 sb.append(cell.isHidden() && !printHidden ? " " : cell.toString());

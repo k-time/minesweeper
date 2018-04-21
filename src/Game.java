@@ -4,18 +4,16 @@ import java.util.Scanner;
 
 public class Game {
 
+    private static final boolean DEBUG = false;
     public static final Scanner in = new Scanner(System.in);
     private Board board;
 
     public Game() {
-        System.out.println("Welcome to Minesweeper!");
-        System.out.println("Enter your moves as the letter and number corresponding to each cell (ex. C5).\n");
         createBoard();
     }
 
     private void createBoard() {
         System.out.print("Please enter a board size between 8 and 26: ");
-        Scanner in = new Scanner(System.in);
         int size = -1;
         while (size < 0) {
             try {
@@ -34,17 +32,16 @@ public class Game {
         return executeMove(move);
     }
 
-    public void end() {
-        System.out.println("Thanks for playing!");
+    public static void end() {
         in.close();
     }
 
     private Move promptForMove() {
         System.out.println();
         board.print();
-        System.out.println();
-        board.printHidden();
-        System.out.println();
+        if (DEBUG) {
+            board.printHidden();
+        }
         System.out.print("Please enter your move: ");
         while (true) {
             try {
