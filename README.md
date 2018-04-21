@@ -1,5 +1,5 @@
 # minesweeper
-My playable Java implementation of minesweeper.
+My playable Java implementation of Minesweeper.
 
 ```
 ************************** Welcome to Minesweeper! **************************
